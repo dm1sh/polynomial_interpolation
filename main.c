@@ -117,6 +117,12 @@ arr *reverse(arr *a)
     return res;
 }
 
+void free_arr(arr *a)
+{
+    free(a->p);
+    free(a);
+}
+
 /*
  Business logic
 */
@@ -200,7 +206,7 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
 {
     arr *res = init(xes->size);
 
-    arr *jcoef = init(xes->size - 1);
+    arr *jcoef = init(xes->size);
     for (int j = 0; j < xes->size; j++)
     {
         int minus = !(xes->size % 2);
@@ -217,9 +223,11 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
         }
 
         res = add(res, jcoef);
+
+        free_arr(xis);
     }
 
-    free(jcoef);
+    free_arr(jcoef);
 
     return res;
 }
@@ -237,8 +245,8 @@ int main()
 
     for (int i = 0; i < n; i++)
     {
-        int x, y;
-        scanf("%d %d", &x, &y);
+        float x, y;
+        scanf("%f %f", &x, &y);
 
         insert(xes, i, x);
         insert(ys, i, y);
@@ -251,7 +259,13 @@ int main()
     arr *res = compose_interpolation_polynomial(xes, ys);
 
     printf("Resulting polynomial will have such coeficients:\n");
-    printa(reverse(res));
+    arr *reversed = reverse(res);
+    printa(reversed);
+
+    free_arr(reversed);
+    free_arr(res);
+    free_arr(xes);
+    free_arr(ys);
 
     return 0;
 }
