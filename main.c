@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "./polynominal_interpolation.h"
+
 /*
  Utils
 */
@@ -19,12 +21,6 @@ int max(int a, int b)
  Array utils
 */
 
-typedef struct
-{
-    int size;
-    float *p;
-} arr;
-
 arr *init(int n)
 {
     arr *a = (arr *)malloc(sizeof(arr));
@@ -33,7 +29,7 @@ arr *init(int n)
 
     a->p = (float *)malloc(sizeof(float) * n);
     for (int i = 0; i < n; i++)
-        a->p[i] = 0;
+        insert(a, i, 0);
 
     return a;
 }
@@ -70,7 +66,7 @@ void insert(arr *a, int pos, float val)
 arr *add(arr *a, arr *b)
 {
     for (int i = 0; i < a->size; i++)
-        a->p[i] = a->p[i] + b->p[i];
+        insert(a, i, a->p[i] + b->p[i]);
 
     return a;
 }
@@ -80,7 +76,7 @@ arr *mult(arr *a, float mul)
     arr *res = init(a->size);
 
     for (int i = 0; i < a->size; i++)
-        res->p[i] = a->p[i] * mul;
+        insert(res, i, a->p[i] * mul);
 
     return res;
 }
@@ -105,7 +101,7 @@ arr *arr_without_el(arr *a, int ex_pos)
     {
         if (i == ex_pos)
             continue;
-        res->p[pos] = a->p[i];
+        insert(res, pos, a->p[i]);
         pos++;
     }
 
@@ -116,13 +112,13 @@ arr *reverse(arr *a)
 {
     arr *res = init(a->size);
     for (int i = 0; i < a->size; i++)
-        res->p[i] = a->p[a->size - 1 - i];
+        insert(res, i, a->p[a->size - 1 - i]);
 
     return res;
 }
 
 /*
- Buisness logic
+ Business logic
 */
 
 int has_comb(int *arr, int n, int k)
@@ -216,7 +212,7 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
         for (int i = 0; i < xes->size; i++)
         {
             float k_sum = sum_of_mult_of_n_combinations(xis, xes->size - 1 - i);
-            jcoef->p[i] = (minus ? -1 : 1) * (multiplicator * k_sum) / denominator;
+            insert(jcoef, i, (minus ? -1 : 1) * (multiplicator * k_sum) / denominator);
             minus = !minus;
         }
 
