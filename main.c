@@ -27,7 +27,7 @@ arr *init(int n)
 
     a->size = n;
 
-    a->p = (float *)malloc(sizeof(float) * n);
+    a->p = (double *)malloc(sizeof(double) * n);
     for (int i = 0; i < n; i++)
         insert(a, i, 0);
 
@@ -39,7 +39,7 @@ arr *resize(arr *a, int new_size)
     if (a->size == new_size)
         return a;
 
-    float *new_p = (float *)malloc(sizeof(float) * new_size);
+    double *new_p = (double *)malloc(sizeof(double) * new_size);
     for (int i = 0; i < min(new_size, a->size); i++)
         new_p[i] = a->p[i];
 
@@ -54,7 +54,7 @@ arr *resize(arr *a, int new_size)
     return a;
 }
 
-void insert(arr *a, int pos, float val)
+void insert(arr *a, int pos, double val)
 {
     pos = pos % a->size;
     if (pos < 0)
@@ -71,7 +71,7 @@ arr *add(arr *a, arr *b)
     return a;
 }
 
-arr *mult(arr *a, float mul)
+arr *mult(arr *a, double mul)
 {
     arr *res = init(a->size);
 
@@ -159,7 +159,7 @@ int has_comb(int *arr, int n, int k)
 
 int mult_by_index(arr *a, int *coords, int n)
 {
-    float res = 1;
+    double res = 1;
     for (int i = 0; i < n; i++)
         res = res * a->p[coords[i]];
 
@@ -176,7 +176,7 @@ int sum_of_mult_of_n_combinations(arr *a, int n)
         return a->p[0];
     }
 
-    float acc = 0;
+    double acc = 0;
 
     int coords[n];
     for (int i = 0; i < n; i++)
@@ -189,9 +189,9 @@ int sum_of_mult_of_n_combinations(arr *a, int n)
     return acc;
 }
 
-int compose_denominator(arr *a, int pos)
+double compose_denominator(arr *a, int pos)
 {
-    float res = 1;
+    double res = 1;
     for (int i = 0; i < a->size; i++)
     {
         if (i == pos)
@@ -210,14 +210,14 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
     for (int j = 0; j < xes->size; j++)
     {
         int minus = !(xes->size % 2);
-        float denominator = compose_denominator(xes, j);
-        float multiplicator = ys->p[j];
+        double denominator = compose_denominator(xes, j);
+        double multiplicator = ys->p[j];
 
         arr *xis = arr_without_el(xes, j);
 
         for (int i = 0; i < xes->size; i++)
         {
-            float k_sum = sum_of_mult_of_n_combinations(xis, xes->size - 1 - i);
+            double k_sum = sum_of_mult_of_n_combinations(xis, xes->size - 1 - i);
             insert(jcoef, i, (minus ? -1 : 1) * (multiplicator * k_sum) / denominator);
             minus = !minus;
         }
@@ -245,8 +245,8 @@ int main()
 
     for (int i = 0; i < n; i++)
     {
-        float x, y;
-        scanf("%f %f", &x, &y);
+        double x, y;
+        scanf("%lf %lf", &x, &y);
 
         insert(xes, i, x);
         insert(ys, i, y);
