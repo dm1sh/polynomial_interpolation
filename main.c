@@ -37,10 +37,37 @@ void print_newton_poly(double *f, double *x, int n)
   }
 }
 
+unsigned int insert_n()
+{
+  printf("Insert number of dots: ");
+  unsigned int n = 0;
+  scanf("%u", &n);
+
+  return n;
+}
+
+void insert_coords(double *xes, double *yes, unsigned int n)
+{
+  printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
+
+  for (int i = 0; i < n; i++)
+  {
+    double x, y;
+    scanf("%lf %lf", &x, &y);
+
+    xes[i] = x;
+    yes[i] = y;
+  }
+}
+
 int main()
 {
-  double x[] = {0, 1, 2, 3},
-         y[] = {-2, -5, 0, -4};
+  unsigned n = insert_n();
 
-  print_newton_poly(div_diff_es(x, y, 4), x, 4);
+  double *x = (double *)malloc(sizeof(double) * n),
+         *y = (double *)malloc(sizeof(double) * n);
+
+  insert_coords(x, y, n);
+
+  print_newton_poly(div_diff_es(x, y, n), x, n);
 }
