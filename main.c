@@ -41,12 +41,12 @@ arr *resize(arr *a, int new_size)
 
     double *new_p = (double *)malloc(sizeof(double) * new_size);
     for (int i = 0; i < min(new_size, a->size); i++)
-        new_p[i] = a->p[i];
+        new_p[i] = get(a, i);
 
     free(a->p);
 
     for (int i = a->size; i < new_size; i++)
-        new_p = 0;
+        new_p[i] = 0;
 
     a->p = new_p;
     a->size = new_size;
@@ -54,19 +54,29 @@ arr *resize(arr *a, int new_size)
     return a;
 }
 
+int convert_pos(int size, int pos)
+{
+    pos = pos % size;
+    if (pos < 0)
+        pos = size + pos;
+
+    return pos;
+}
+
 void insert(arr *a, int pos, double val)
 {
-    pos = pos % a->size;
-    if (pos < 0)
-        pos = a->size + pos;
+    a->p[convert_pos(a->size, pos)] = val;
+}
 
-    a->p[pos] = val;
+double get(arr *a, int pos)
+{
+    return a->p[convert_pos(a->size, pos)];
 }
 
 arr *add(arr *a, arr *b)
 {
     for (int i = 0; i < a->size; i++)
-        insert(a, i, a->p[i] + b->p[i]);
+        insert(a, i, get(a, i) + get(b, i));
 
     return a;
 }
@@ -76,7 +86,7 @@ arr *mult(arr *a, double mul)
     arr *res = init(a->size);
 
     for (int i = 0; i < a->size; i++)
-        insert(res, i, a->p[i] * mul);
+        insert(res, i, get(a, i) * mul);
 
     return res;
 }
@@ -90,7 +100,7 @@ void printa(arr *a)
     printf("\n");
 
     for (int i = 0; i < a->size; i++)
-        printf("%5.2f ", a->p[i]);
+        printf("%5.2f ", get(a, i));
     printf("\n");
 }
 
@@ -101,7 +111,7 @@ arr *arr_without_el(arr *a, int ex_pos)
     {
         if (i == ex_pos)
             continue;
-        insert(res, pos, a->p[i]);
+        insert(res, pos, get(a, i));
         pos++;
     }
 
@@ -112,7 +122,7 @@ arr *reverse(arr *a)
 {
     arr *res = init(a->size);
     for (int i = 0; i < a->size; i++)
-        insert(res, i, a->p[a->size - 1 - i]);
+        insert(res, i, get(a, a->size - 1 - i));
 
     return res;
 }
@@ -161,7 +171,7 @@ int mult_by_index(arr *a, int *coords, int n)
 {
     double res = 1;
     for (int i = 0; i < n; i++)
-        res = res * a->p[coords[i]];
+        res = res * get(a, coords[i]);
 
     return res;
 }
@@ -173,7 +183,7 @@ int sum_of_mult_of_n_combinations(arr *a, int n)
 
     if (a->size == 1)
     {
-        return a->p[0];
+        return get(a, 0);
     }
 
     double acc = 0;
@@ -197,7 +207,7 @@ double compose_denominator(arr *a, int pos)
         if (i == pos)
             continue;
 
-        res = res * (a->p[pos] - a->p[i]);
+        res = res * (get(a, pos) - get(a, i));
     }
     return res;
 }
@@ -211,7 +221,7 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
     {
         int minus = !(xes->size % 2);
         double denominator = compose_denominator(xes, j);
-        double multiplicator = ys->p[j];
+        double multiplicator = get(ys, j);
 
         arr *xis = arr_without_el(xes, j);
 

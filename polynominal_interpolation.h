@@ -20,7 +20,9 @@ typedef struct
 
 arr *init(int n);
 arr *resize(arr *a, int new_size);
+int convert_pos(int size, int pos);
 void insert(arr *a, int pos, double val);
+double get(arr *a, int pos);
 arr *add(arr *a, arr *b);
 arr *mult(arr *a, double mul);
 void printa(arr *a);
