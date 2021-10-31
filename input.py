@@ -7,5 +7,19 @@ except:
 
 print(n)
 
+def f(x: int) -> int:
+  """
+  f(x) = sum with i from 0 to n-1 (i+1)*x^i
+
+  E.g. f(x) = 5x^4 + 4x^3 + 3x^2 + 2x + 1
+  """
+
+  res: int = 0
+
+  for i in range(n):
+    res += (i+1) * pow(x, i)
+
+  return res
+
 for i in range(n):
-  print(i, -i if i % 2 == 0 else i)
+  print(i, f(i))
