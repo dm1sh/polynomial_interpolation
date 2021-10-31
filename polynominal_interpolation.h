@@ -30,8 +30,7 @@ void print_poly(double *coef, unsigned int n);
  Coeficients of simplified polynomial computation
 */
 
-void simplify_polynomial(double *res, double *rev_el_coef, double *x, unsigned int n);
-double compute_sum_of_multiplications_of_k(double *x, unsigned int k, unsigned int n);
-double mult_by_indexes(double *arr, unsigned int *indexes, unsigned int size);
+void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n);
+void mult_by_root(double *res, double root, unsigned int step);
 
 #endif

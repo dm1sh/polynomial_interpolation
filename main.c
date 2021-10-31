@@ -38,66 +38,26 @@ double *div_diff_es(double *x, double *y, unsigned int n)
  Coeficients of simplified polynomial computation
 */
 
-void simplify_polynomial(double *res, double *rev_el_coef, double *x, unsigned int n)
+void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n)
 {
+  double *tmp_polynomial = (double *)malloc(sizeof(double) * n);
+  tmp_polynomial[0] = 1;
+
   for (int i = 0; i < n; i++)
-    if (rev_el_coef[i])
+    if (el_coef[i])
+    {
+      if (i > 0)
+        mult_by_root(tmp_polynomial, x[i - 1], i - 1);
+
       for (int j = 0; j <= i; j++)
-        res[i - j] += (j % 2 ? -1 : 1) * rev_el_coef[i] * compute_sum_of_multiplications_of_k(x, j, i);
+        res[j] += el_coef[i] * tmp_polynomial[j];
+    }
 }
 
-double compute_sum_of_multiplications_of_k(double *arr, unsigned int k, unsigned int n)
+void mult_by_root(double *res, double root, unsigned int step)
 {
-  if (k == 0)
-    return 1;
-
-  if (k == 1 && n == 1)
-    return arr[0];
-
-  unsigned int *selected = (unsigned int *)malloc(sizeof(unsigned int) * k); // Indexes of selected for multiplication elements
-
-  int i = 0, // index of `arr` array
-      j = 0; // index of `selected` array
-
-  double sum = 0;
-
-  while (j >= 0)
-  {
-    if (i <= (n + (j - k)))
-    {
-      selected[j] = i;
-
-      if (j == k - 1)
-      {
-        sum += mult_by_indexes(arr, selected, k);
-        i++;
-      }
-      else
-      {
-        i = selected[j] + 1;
-        j++;
-      }
-    }
-    else
-    {
-      j--;
-      if (j >= 0)
-        i = selected[j] + 1;
-    }
-  }
-
-  free(selected);
-
-  return sum;
-}
-
-double mult_by_indexes(double *arr, unsigned int *indexes, unsigned int size)
-{
-  double res = 1;
-  for (int i = 0; i < size; i++)
-    res *= arr[indexes[i]];
-
-  return res;
+  for (int j = step + 1; j >= 0; j--)
+    res[j] = (j ? res[j - 1] : 0) - (root * res[j]);
 }
 
 /*
