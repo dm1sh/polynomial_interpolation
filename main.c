@@ -38,26 +38,31 @@ double *div_diff_es(double *x, double *y, unsigned int n)
  Coeficients of simplified polynomial computation
 */
 
+/* Simplifies Newton polynomial with `el_coef` array of divided differences,
+   and `x` as array of x coordinates of dots,
+   and `n` is number of elements of this sum */
 void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n)
 {
-  double *tmp_polynomial = (double *)malloc(sizeof(double) * n);
-  tmp_polynomial[0] = 1;
+  double *tmp_polynomial // Temporary array for storage of coefficients of multiplication of (x-x_i) polynomial
+      = (double *)malloc(sizeof(double) * n);
+  tmp_polynomial[0] = 1; // Set polynomial to 1 to start multiplication with it
 
-  for (int i = 0; i < n; i++)
-    if (el_coef[i])
-    {
-      if (i > 0)
-        mult_by_root(tmp_polynomial, x[i - 1], i - 1);
+  for (int i = 0; i < n; i++) // For each elemnt of sum
+  {
+    if (i > 0) // Start multiplication from second element of sum
+      mult_by_root(tmp_polynomial, x[i - 1], i - 1);
 
-      for (int j = 0; j <= i; j++)
-        res[j] += el_coef[i] * tmp_polynomial[j];
-    }
+    for (int j = 0; j <= i; j++)                // For each cumputed coefficient of i'th polynomial of sum
+      res[j] += el_coef[i] * tmp_polynomial[j]; // Add it, multiplied with divided difference, to sum
+  }
 }
 
-void mult_by_root(double *res, double root, unsigned int step)
+/* `res` is an array of coefficients of polynomial which is multiplied with (x - `root`) polynomial
+   `power` is the power of `res` polynomial */
+void mult_by_root(double *res, double root, unsigned int power)
 {
-  for (int j = step + 1; j >= 0; j--)
-    res[j] = (j ? res[j - 1] : 0) - (root * res[j]);
+  for (int j = power + 1; j >= 0; j--)
+    res[j] = (j ? res[j - 1] : 0) - (root * res[j]); // coefficient is k_i-1 - root * k_i
 }
 
 /*
