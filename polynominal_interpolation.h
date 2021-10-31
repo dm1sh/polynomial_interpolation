@@ -1,40 +1,37 @@
 #ifndef POLYNOMIAL_INTERPOLATION_H
 #define POLYNOMIAL_INTERPOLATION_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /*
  Utils
 */
-
-int min(int a, int b);
-int max(int a, int b);
-
-/*
- Array utils
-*/
-
-typedef struct
-{
-    int size;
-    double *p;
-} arr;
-
-arr *init(int n);
-arr *resize(arr *a, int new_size);
-void insert(arr *a, int pos, double val);
-arr *add(arr *a, arr *b);
-arr *mult(arr *a, double mul);
-void printa(arr *a);
-arr *arr_without_el(arr *a, int ex_pos);
-arr *reverse(arr *a);
+double fabs(double x);
 
 /*
  Business logic
 */
 
-int has_comb(int *arr, int n, int k);
-int mult_by_index(arr *a, int *coords, int n);
-int sum_of_mult_of_n_combinations(arr *a, int n);
-double compose_denominator(arr *a, int pos);
-arr *compose_interpolation_polynomial(arr *xes, arr *ys);
+double div_diff(double *y, double *x, unsigned int i, unsigned int d);
+double *div_diff_es(double *x, double *y, unsigned int n);
+
+/*
+ User interface
+*/
+
+unsigned int insert_n();
+void print_newton_poly(double *f, double *x, unsigned int n);
+void insert_coords(double *x, double *y, unsigned int n);
+void print_array(double *arr, unsigned int n);
+void print_poly(double *coef, unsigned int n);
+
+/*
+ Coeficients of simplified polynomial computation
+*/
+
+void simplify_polynomial(double *res, double *rev_el_coef, double *x, unsigned int n);
+double compute_sum_of_multiplications_of_k(double *x, unsigned int k, unsigned int n);
+double mult_by_indexes(double *arr, unsigned int *indexes, unsigned int size);
 
 #endif

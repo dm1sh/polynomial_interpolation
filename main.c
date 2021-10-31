@@ -1,271 +1,236 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "./polynominal_interpolation.h"
 
-/*
- Utils
-*/
+/* Utils */
 
-int min(int a, int b)
+double fabs(double x)
 {
-    return (a + b - abs(a - b)) / 2;
-}
-
-int max(int a, int b)
-{
-    return (a + b + abs(a - b)) / 2;
+  return x > 0 ? x : -x;
 }
 
 /*
- Array utils
+ Newton interpolation polynomial
 */
 
-arr *init(int n)
+/* Divided difference is evaluated for:
+   array y stands for f(x)
+   array x stands for x
+   number i stands for index of evaluated difference (from 0)
+   number d stands for order of difference (from 0)
+   example: https://shorturl.at/tBCPS */
+double div_diff(double *y, double *x, unsigned int i, unsigned int d)
 {
-    arr *a = (arr *)malloc(sizeof(arr));
-
-    a->size = n;
-
-    a->p = (double *)malloc(sizeof(double) * n);
-    for (int i = 0; i < n; i++)
-        insert(a, i, 0);
-
-    return a;
+  return (y[i] - y[i - 1]) / (x[i] - x[i - d]);
 }
 
-arr *resize(arr *a, int new_size)
+/* Evaluates divided differences of n values - array of some kind of derivatives with big enough dx
+   Example: https://shorturl.at/tBCPS
+   Warning: result is evaluated in `double *y` array */
+double *div_diff_es(double *x, double *y, unsigned int n)
 {
-    if (a->size == new_size)
-        return a;
+  for (int i = 1; i < n; i++)        // first element remains unchanged
+    for (int j = n - 1; j >= i; j--) // evaluate from the end of array, decreacing number of step every repeation
+      y[j] = div_diff(y, x, j, i);
 
-    double *new_p = (double *)malloc(sizeof(double) * new_size);
-    for (int i = 0; i < min(new_size, a->size); i++)
-        new_p[i] = a->p[i];
-
-    free(a->p);
-
-    for (int i = a->size; i < new_size; i++)
-        new_p = 0;
-
-    a->p = new_p;
-    a->size = new_size;
-
-    return a;
+  return y;
 }
 
-void insert(arr *a, int pos, double val)
-{
-    pos = pos % a->size;
-    if (pos < 0)
-        pos = a->size + pos;
+/*
+ Coeficients of simplified polynomial computation
+*/
 
-    a->p[pos] = val;
+void simplify_polynomial(double *res, double *rev_el_coef, double *x, unsigned int n)
+{
+  for (int i = 0; i < n; i++)
+    if (rev_el_coef[i])
+      for (int j = 0; j <= i; j++)
+        res[i - j] += (j % 2 ? -1 : 1) * rev_el_coef[i] * compute_sum_of_multiplications_of_k(x, j, i);
 }
 
-arr *add(arr *a, arr *b)
+double compute_sum_of_multiplications_of_k(double *arr, unsigned int k, unsigned int n)
 {
-    for (int i = 0; i < a->size; i++)
-        insert(a, i, a->p[i] + b->p[i]);
+  if (k == 0)
+    return 1;
 
-    return a;
-}
+  if (k == 1 && n == 1)
+    return arr[0];
 
-arr *mult(arr *a, double mul)
-{
-    arr *res = init(a->size);
+  unsigned int *selected = (unsigned int *)malloc(sizeof(unsigned int) * k); // Indexes of selected for multiplication elements
 
-    for (int i = 0; i < a->size; i++)
-        insert(res, i, a->p[i] * mul);
+  int i = 0, // index of `arr` array
+      j = 0; // index of `selected` array
 
-    return res;
-}
+  double sum = 0;
 
-void printa(arr *a)
-{
-    printf("Array of size %d:\n", a->size);
-
-    for (int i = 0; i < a->size; i++)
-        printf("%5d ", i + 1);
-    printf("\n");
-
-    for (int i = 0; i < a->size; i++)
-        printf("%5.2f ", a->p[i]);
-    printf("\n");
-}
-
-arr *arr_without_el(arr *a, int ex_pos)
-{
-    arr *res = init(a->size - 1);
-    for (int i = 0, pos = 0; i < a->size; i++)
+  while (j >= 0)
+  {
+    if (i <= (n + (j - k)))
     {
-        if (i == ex_pos)
-            continue;
-        insert(res, pos, a->p[i]);
-        pos++;
-    }
+      selected[j] = i;
 
-    return res;
-}
-
-arr *reverse(arr *a)
-{
-    arr *res = init(a->size);
-    for (int i = 0; i < a->size; i++)
-        insert(res, i, a->p[a->size - 1 - i]);
-
-    return res;
-}
-
-void free_arr(arr *a)
-{
-    free(a->p);
-    free(a);
-}
-
-/*
- Business logic
-*/
-
-int has_comb(int *arr, int n, int k)
-{
-    if (n == k)
-        return 0;
-
-    int pos = k - 1;
-
-    if (arr[pos] == n - 1)
-    {
-        if (k == 1)
-            return 0;
-
-        while ((pos > 0) && arr[pos] == n - 1)
-        {
-            pos--;
-            arr[pos]++;
-        }
-
-        for (int i = pos + 1; i < k; i++)
-            arr[i] = arr[i - 1] + 1;
-
-        if (arr[0] > n - k)
-            return 0;
+      if (j == k - 1)
+      {
+        sum += mult_by_indexes(arr, selected, k);
+        i++;
+      }
+      else
+      {
+        i = selected[j] + 1;
+        j++;
+      }
     }
     else
-        arr[pos]++;
-
-    return 1;
-}
-
-int mult_by_index(arr *a, int *coords, int n)
-{
-    double res = 1;
-    for (int i = 0; i < n; i++)
-        res = res * a->p[coords[i]];
-
-    return res;
-}
-
-int sum_of_mult_of_n_combinations(arr *a, int n)
-{
-    if (n == 0)
-        return 1;
-
-    if (a->size == 1)
     {
-        return a->p[0];
+      j--;
+      if (j >= 0)
+        i = selected[j] + 1;
     }
+  }
 
-    double acc = 0;
+  free(selected);
 
-    int coords[n];
-    for (int i = 0; i < n; i++)
-        coords[i] = i;
-
-    acc += mult_by_index(a, coords, n);
-    while (has_comb(coords, a->size, n))
-        acc += mult_by_index(a, coords, n);
-
-    return acc;
+  return sum;
 }
 
-double compose_denominator(arr *a, int pos)
+double mult_by_indexes(double *arr, unsigned int *indexes, unsigned int size)
 {
-    double res = 1;
-    for (int i = 0; i < a->size; i++)
-    {
-        if (i == pos)
-            continue;
+  double res = 1;
+  for (int i = 0; i < size; i++)
+    res *= arr[indexes[i]];
 
-        res = res * (a->p[pos] - a->p[i]);
-    }
-    return res;
+  return res;
 }
 
-arr *compose_interpolation_polynomial(arr *xes, arr *ys)
+/*
+ User Interface 
+*/
+
+/* Prints interpolation polynomial in Newton notation */
+void print_newton_poly(double *f, double *x, unsigned int n)
 {
-    arr *res = init(xes->size);
-
-    arr *jcoef = init(xes->size);
-    for (int j = 0; j < xes->size; j++)
+  printf("Newton polynomial form:\n");
+  for (int i = 0; i < n; i++)
+  {
+    if (f[i]) // If coefficient != 0
     {
-        int minus = !(xes->size % 2);
-        double denominator = compose_denominator(xes, j);
-        double multiplicator = ys->p[j];
+      /* Coefficient sign and sum symbol */
+      if (i > 0 && f[i - 1]) // If it's not the first summond
+      {
+        if (f[i] > 0)
+          printf("+ ");
+        else
+          printf("- ");
+      }
+      else if (f[i] < 0) // If it is the first summond and coefficient is below zero
+        printf("-");
 
-        arr *xis = arr_without_el(xes, j);
+      printf("%lf", fabs(f[i])); // Print coefficient without sign
 
-        for (int i = 0; i < xes->size; i++)
+      for (int j = 0; j < i; j++) // For each (x-xi) bracket
+      {
+        if (x[j]) // If summond is not zero, print it
         {
-            double k_sum = sum_of_mult_of_n_combinations(xis, xes->size - 1 - i);
-            insert(jcoef, i, (minus ? -1 : 1) * (multiplicator * k_sum) / denominator);
-            minus = !minus;
+          if (x[j] > 0)
+            printf("*(x-%lf)", x[j]);
+          else
+            printf("*(x+%lf)", -x[j]);
         }
+        else
+          printf("*x");
+      }
 
-        res = add(res, jcoef);
-
-        free_arr(xis);
+      printf(" ");
     }
+  }
 
-    free_arr(jcoef);
-
-    return res;
+  printf("\n");
 }
+
+unsigned int insert_n()
+{
+  printf("Insert number of dots: ");
+  unsigned int n = 0;
+  scanf("%u", &n);
+
+  return n;
+}
+
+void insert_coords(double *xes, double *yes, unsigned int n)
+{
+  printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
+
+  for (int i = 0; i < n; i++)
+  {
+    double x, y;
+    scanf("%lf %lf", &x, &y);
+
+    xes[i] = x;
+    yes[i] = y;
+  }
+}
+
+void print_array(double *arr, unsigned int n)
+{
+  printf("Simplified coefficients array (starting from 0 upto n-1 power):\n");
+
+  for (int i = 0; i < n; i++)
+    printf("%lf ", arr[i]);
+
+  printf("\n");
+}
+
+void print_poly(double *coef, unsigned int n)
+{
+  printf("Simplified polynom:\n");
+
+  for (int i = 0; i < n; i++)
+  {
+    if (coef[i])
+    {
+      if (i > 0 && coef[i - 1])
+        if (coef[i] > 0)
+          printf("+ ");
+        else
+          printf("- ");
+      else
+        printf("-");
+
+      printf("%lf", fabs(coef[i]));
+      if (i > 0)
+        printf("*x");
+      if (i > 1)
+        printf("^%d ", i);
+      else
+        printf(" ");
+    }
+  }
+
+  printf("\n");
+}
+
+/* 
+ Main
+*/
 
 int main()
 {
-    printf("Insert number of dots: ");
-    int n = 0;
-    scanf("%d", &n);
+  unsigned n = insert_n();
 
-    printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
+  double *x = (double *)malloc(sizeof(double) * n),
+         *y = (double *)malloc(sizeof(double) * n);
 
-    arr *xes = init(n);
-    arr *ys = init(n);
+  insert_coords(x, y, n);
 
-    for (int i = 0; i < n; i++)
-    {
-        double x, y;
-        scanf("%lf %lf", &x, &y);
+  double *f = div_diff_es(x, y, n);
 
-        insert(xes, i, x);
-        insert(ys, i, y);
-    }
+  print_newton_poly(f, x, n);
 
-    printf("Inserted the following doths:\n");
-    printa(xes);
-    printa(ys);
+  double *coefficients = (double *)malloc(sizeof(double) * n);
 
-    arr *res = compose_interpolation_polynomial(xes, ys);
+  simplify_polynomial(coefficients, f, x, n);
 
-    printf("Resulting polynomial will have such coeficients:\n");
-    arr *reversed = reverse(res);
-    printa(reversed);
+  print_array(coefficients, n);
 
-    free_arr(reversed);
-    free_arr(res);
-    free_arr(xes);
-    free_arr(ys);
+  print_poly(coefficients, n);
 
-    return 0;
+  return 0;
 }
