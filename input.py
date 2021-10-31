@@ -1,4 +1,5 @@
 import sys
+import math
 
 try:
   n = int(sys.argv[1])
@@ -22,4 +23,4 @@ def f(x: int) -> int:
   return res
 
 for i in range(n):
-  print(i, f(i))
+  print(i, math.sin(i))

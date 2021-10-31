@@ -55,6 +55,8 @@ void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n
     for (int j = 0; j <= i; j++)                // For each cumputed coefficient of i'th polynomial of sum
       res[j] += el_coef[i] * tmp_polynomial[j]; // Add it, multiplied with divided difference, to sum
   }
+
+  free(tmp_polynomial);
 }
 
 /* `res` is an array of coefficients of polynomial, which is multiplied with (x - `root`) polynomial.
@@ -88,16 +90,16 @@ void print_newton_poly(double *f, double *x, unsigned int n)
       else if (f[i] < 0) // If it is the first summond and coefficient is below zero
         printf("-");
 
-      printf("%lf", fabs(f[i])); // Print coefficient without sign
+      printf("%g", fabs(f[i])); // Print coefficient without sign
 
       for (int j = 0; j < i; j++) // For each (x-xi) bracket
       {
         if (x[j]) // If summond is not zero, print it
         {
           if (x[j] > 0)
-            printf("*(x-%lf)", x[j]);
+            printf("*(x-%g)", x[j]);
           else
-            printf("*(x+%lf)", -x[j]);
+            printf("*(x+%g)", -x[j]);
         }
         else
           printf("*x");
@@ -110,6 +112,7 @@ void print_newton_poly(double *f, double *x, unsigned int n)
   printf("\n");
 }
 
+/* Returns inputed by user number of dots */
 unsigned int insert_n()
 {
   printf("Insert number of dots: ");
@@ -119,6 +122,7 @@ unsigned int insert_n()
   return n;
 }
 
+/* Reads pairs of x'es and y'es of n dots to corresponding array */
 void insert_coords(double *xes, double *yes, unsigned int n)
 {
   printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
@@ -133,19 +137,22 @@ void insert_coords(double *xes, double *yes, unsigned int n)
   }
 }
 
+/* Prints array of n doubles */
 void print_array(double *arr, unsigned int n)
 {
   printf("Simplified coefficients array (starting from 0 upto n-1 power):\n");
 
   for (int i = 0; i < n; i++)
-    printf("%lf ", arr[i]);
+    printf("%g ", arr[i]);
 
   printf("\n");
 }
 
+/* Prints interpolation polynomial in standart form
+   e.g. a*x^2 + b*x + c */
 void print_poly(double *coef, unsigned int n)
 {
-  printf("Simplified polynomial:\n");
+  printf("Polynomial in standart form:\n");
 
   for (int i = 0; i < n; i++)
   {
@@ -159,7 +166,7 @@ void print_poly(double *coef, unsigned int n)
       else if (coef[i] < 0)
         printf("-");
 
-      printf("%lf", fabs(coef[i]));
+      printf("%g", fabs(coef[i]));
       if (i > 0)
         printf("*x");
       if (i > 1)
@@ -196,6 +203,10 @@ int main()
   print_array(coefficients, n);
 
   print_poly(coefficients, n);
+
+  free(x);
+  free(y);
+  free(coefficients);
 
   return 0;
 }
