@@ -57,7 +57,7 @@ void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n
   }
 }
 
-/* `res` is an array of coefficients of polynomial which is multiplied with (x - `root`) polynomial
+/* `res` is an array of coefficients of polynomial, which is multiplied with (x - `root`) polynomial.
    `power` is the power of `res` polynomial */
 void mult_by_root(double *res, double root, unsigned int power)
 {
@@ -145,7 +145,7 @@ void print_array(double *arr, unsigned int n)
 
 void print_poly(double *coef, unsigned int n)
 {
-  printf("Simplified polynom:\n");
+  printf("Simplified polynomial:\n");
 
   for (int i = 0; i < n; i++)
   {
@@ -156,7 +156,7 @@ void print_poly(double *coef, unsigned int n)
           printf("+ ");
         else
           printf("- ");
-      else
+      else if (coef[i] < 0)
         printf("-");
 
       printf("%lf", fabs(coef[i]));
