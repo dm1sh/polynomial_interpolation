@@ -5,6 +5,11 @@
 #include <stdlib.h>
 
 /*
+ Utils
+*/
+double fabs(double x);
+
+/*
  Business logic
 */
 
@@ -19,6 +24,7 @@ unsigned int insert_n();
 void print_newton_poly(double *f, double *x, unsigned int n);
 void insert_coords(double *x, double *y, unsigned int n);
 void print_array(double *arr, unsigned int n);
+void print_poly(double *coef, unsigned int n);
 
 /*
  Coeficients of simplified polynomial computation

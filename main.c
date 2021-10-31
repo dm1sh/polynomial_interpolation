@@ -1,5 +1,12 @@
 #include "./polynominal_interpolation.h"
 
+/* Utils */
+
+double fabs(double x)
+{
+  return x > 0 ? x : -x;
+}
+
 /*
  Newton interpolation polynomial
 */
@@ -100,15 +107,42 @@ double mult_by_indexes(double *arr, unsigned int *indexes, unsigned int size)
 /* Prints interpolation polynomial in Newton notation */
 void print_newton_poly(double *f, double *x, unsigned int n)
 {
+  printf("Newton polynomial form:\n");
   for (int i = 0; i < n; i++)
   {
-    printf("(%lf)", f[i]);
-    for (int j = 0; j < i; j++)
-      printf("*(x-(%lf))", x[j]);
+    if (f[i]) // If coefficient != 0
+    {
+      /* Coefficient sign and sum symbol */
+      if (i > 0 && f[i - 1]) // If it's not the first summond
+      {
+        if (f[i] > 0)
+          printf("+ ");
+        else
+          printf("- ");
+      }
+      else if (f[i] < 0) // If it is the first summond and coefficient is below zero
+        printf("-");
 
-    if (i != n - 1)
-      printf("+");
+      printf("%lf", fabs(f[i])); // Print coefficient without sign
+
+      for (int j = 0; j < i; j++) // For each (x-xi) bracket
+      {
+        if (x[j]) // If summond is not zero, print it
+        {
+          if (x[j] > 0)
+            printf("*(x-%lf)", x[j]);
+          else
+            printf("*(x+%lf)", -x[j]);
+        }
+        else
+          printf("*x");
+      }
+
+      printf(" ");
+    }
   }
+
+  printf("\n");
 }
 
 unsigned int insert_n()
@@ -136,8 +170,38 @@ void insert_coords(double *xes, double *yes, unsigned int n)
 
 void print_array(double *arr, unsigned int n)
 {
+  printf("Simplified coefficients array (starting from 0 upto n-1 power):\n");
+
   for (int i = 0; i < n; i++)
     printf("%lf ", arr[i]);
+
+  printf("\n");
+}
+
+void print_poly(double *coef, unsigned int n)
+{
+  printf("Simplified polynom:\n");
+
+  for (int i = 0; i < n; i++)
+  {
+    if (coef[i])
+    {
+      if (i > 0 && coef[i - 1])
+        if (coef[i] > 0)
+          printf("+ ");
+        else
+          printf("- ");
+      else
+        printf("-");
+
+      printf("%lf", fabs(coef[i]));
+      if (i > 0)
+        printf("*x");
+      if (i > 1)
+        printf("^%d ", i);
+      else printf(" ");
+    }
+  }
 
   printf("\n");
 }
@@ -159,11 +223,13 @@ int main()
 
   print_newton_poly(f, x, n);
 
-  double *coeficients = (double *)malloc(sizeof(double) * n);
+  double *coefficients = (double *)malloc(sizeof(double) * n);
 
-  simplify_polynomial(coeficients, f, x, n);
+  simplify_polynomial(coefficients, f, x, n);
 
-  print_array(coeficients, n);
+  print_array(coefficients, n);
+
+  print_poly(coefficients, n);
 
   return 0;
 }
