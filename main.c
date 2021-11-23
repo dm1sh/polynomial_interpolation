@@ -17,7 +17,7 @@ double fabs(double x)
    number i stands for index of evaluated difference (from 0)
    number d stands for order of difference (from 0)
    example: https://shorturl.at/tBCPS */
-double div_diff(double *y, double *x, unsigned int i, unsigned int d)
+double div_diff(double *y, double *x, unsigned i, unsigned d)
 {
   return (y[i] - y[i - 1]) / (x[i] - x[i - d]);
 }
@@ -25,7 +25,7 @@ double div_diff(double *y, double *x, unsigned int i, unsigned int d)
 /* Evaluates divided differences of n values - array of some kind of derivatives with big enough dx
    Example: https://shorturl.at/tBCPS
    Warning: result is evaluated in `double *y` array */
-double *div_diff_es(double *x, double *y, unsigned int n)
+double *div_diff_es(double *x, double *y, unsigned n)
 {
   for (int i = 1; i < n; i++)        // first element remains unchanged
     for (int j = n - 1; j >= i; j--) // evaluate from the end of array, decreacing number of step every repeation
@@ -41,10 +41,12 @@ double *div_diff_es(double *x, double *y, unsigned int n)
 /* Simplifies Newton polynomial with `el_coef` array of divided differences,
    and `x` as array of x coordinates of dots,
    and `n` is number of elements of this sum */
-void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n)
+void simplify_polynomial(double *res, double *el_coef, double *x, unsigned n)
 {
   double *tmp_polynomial // Temporary array for storage of coefficients of multiplication of (x-x_i) polynomial
       = (double *)malloc(sizeof(double) * n);
+  for (int i = 1; i < n; i++)
+    tmp_polynomial[i] = 0;
   tmp_polynomial[0] = 1; // Set polynomial to 1 to start multiplication with it
 
   for (int i = 0; i < n; i++) // For each elemnt of sum
@@ -61,7 +63,7 @@ void simplify_polynomial(double *res, double *el_coef, double *x, unsigned int n
 
 /* `res` is an array of coefficients of polynomial, which is multiplied with (x - `root`) polynomial.
    `power` is the power of `res` polynomial */
-void mult_by_root(double *res, double root, unsigned int power)
+void mult_by_root(double *res, double root, unsigned power)
 {
   for (int j = power + 1; j >= 0; j--)
     res[j] = (j ? res[j - 1] : 0) - (root * res[j]); // coefficient is k_i-1 - root * k_i
@@ -72,7 +74,7 @@ void mult_by_root(double *res, double root, unsigned int power)
 */
 
 /* Prints interpolation polynomial in Newton notation */
-void print_newton_poly(double *f, double *x, unsigned int n)
+void print_newton_poly(double *f, double *x, unsigned n)
 {
   printf("Newton polynomial form:\n");
   for (int i = 0; i < n; i++)
@@ -113,17 +115,17 @@ void print_newton_poly(double *f, double *x, unsigned int n)
 }
 
 /* Returns inputed by user number of dots */
-unsigned int insert_n()
+unsigned insert_n()
 {
   printf("Insert number of dots: ");
-  unsigned int n = 0;
+  unsigned n = 0;
   scanf("%u", &n);
 
   return n;
 }
 
 /* Reads pairs of x'es and y'es of n dots to corresponding array */
-void insert_coords(double *xes, double *yes, unsigned int n)
+void insert_coords(double *xes, double *yes, unsigned n)
 {
   printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
 
@@ -138,7 +140,7 @@ void insert_coords(double *xes, double *yes, unsigned int n)
 }
 
 /* Prints array of n doubles */
-void print_array(double *arr, unsigned int n)
+void print_array(double *arr, unsigned n)
 {
   printf("Simplified coefficients array (starting from 0 upto n-1 power):\n");
 
@@ -150,7 +152,7 @@ void print_array(double *arr, unsigned int n)
 
 /* Prints interpolation polynomial in standart form
    e.g. a*x^2 + b*x + c */
-void print_poly(double *coef, unsigned int n)
+void print_poly(double *coef, unsigned n)
 {
   printf("Polynomial in standart form:\n");
 
@@ -197,6 +199,8 @@ int main()
   print_newton_poly(f, x, n);
 
   double *coefficients = (double *)malloc(sizeof(double) * n);
+  for (unsigned i = 0; i < n; i++)
+    coefficients[i] = 0;
 
   simplify_polynomial(coefficients, f, x, n);
 
