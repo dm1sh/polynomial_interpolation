@@ -16,14 +16,14 @@ double fabs(double x)
    array x stands for x
    number i stands for index of evaluated difference (from 0)
    number d stands for order of difference (from 0)
-   example: https://shorturl.at/tBCPS */
+   example: https://en.wikipedia.org/wiki/Newton_polynomial#Examples */
 double div_diff(double *y, double *x, unsigned i, unsigned d)
 {
   return (y[i] - y[i - 1]) / (x[i] - x[i - d]);
 }
 
 /* Evaluates divided differences of n values - array of some kind of derivatives with big enough dx
-   Example: https://shorturl.at/tBCPS
+   Example: https://en.wikipedia.org/wiki/Newton_polynomial#Examples
    Warning: result is evaluated in `double *y` array */
 double *div_diff_es(double *x, double *y, unsigned n)
 {
