@@ -15,15 +15,17 @@ int max(int a, int b);
 typedef struct
 {
     int size;
-    float *p;
+    double *p;
 } arr;
 
 arr *init(int n);
 arr *resize(arr *a, int new_size);
-void insert(arr *a, int pos, float val);
+int convert_addr(arr *a, int pos);
+double get(arr *a, int pos);
+void set(arr *a, int pos, double val);
 arr *add(arr *a, arr *b);
-arr *mult(arr *a, float mul);
-void printa(arr *a);
+arr *mult(arr *a, double mul);
+void printa(arr *a, int q);
 arr *arr_without_el(arr *a, int ex_pos);
 arr *reverse(arr *a);
 

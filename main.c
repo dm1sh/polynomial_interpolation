@@ -27,9 +27,9 @@ arr *init(int n)
 
     a->size = n;
 
-    a->p = (float *)malloc(sizeof(float) * n);
+    a->p = (double *)malloc(sizeof(double) * n);
     for (int i = 0; i < n; i++)
-        insert(a, i, 0);
+        set(a, i, 0);
 
     return a;
 }
@@ -39,9 +39,9 @@ arr *resize(arr *a, int new_size)
     if (a->size == new_size)
         return a;
 
-    float *new_p = (float *)malloc(sizeof(float) * new_size);
+    double *new_p = (double *)malloc(sizeof(double) * new_size);
     for (int i = 0; i < min(new_size, a->size); i++)
-        new_p[i] = a->p[i];
+        new_p[i] = get(a, i);
 
     free(a->p);
 
@@ -54,35 +54,60 @@ arr *resize(arr *a, int new_size)
     return a;
 }
 
-void insert(arr *a, int pos, float val)
+int convert_addr(arr *a, int pos)
 {
     pos = pos % a->size;
     if (pos < 0)
         pos = a->size + pos;
 
+    return pos;
+}
+
+double get(arr *a, int pos)
+{
+    pos = convert_addr(a, pos);
+
+    return a->p[pos];
+}
+
+void set(arr *a, int pos, double val)
+{
+    pos = convert_addr(a, pos);
+
     a->p[pos] = val;
+
+    // printa(a, 1);
 }
 
 arr *add(arr *a, arr *b)
 {
     for (int i = 0; i < a->size; i++)
-        insert(a, i, a->p[i] + b->p[i]);
+        set(a, i, a->p[i] + b->p[i]);
 
     return a;
 }
 
-arr *mult(arr *a, float mul)
+arr *mult(arr *a, double mul)
 {
     arr *res = init(a->size);
 
     for (int i = 0; i < a->size; i++)
-        insert(res, i, a->p[i] * mul);
+        set(res, i, a->p[i] * mul);
 
     return res;
 }
 
-void printa(arr *a)
+void printa(arr *a, int q)
 {
+    if (q)
+    {
+        for (int i = 0; i < a->size; i++)
+            printf("%f ", get(a, i));
+        printf("\n");
+
+        return;
+    }
+
     printf("Array of size %d:\n", a->size);
 
     for (int i = 0; i < a->size; i++)
@@ -90,7 +115,7 @@ void printa(arr *a)
     printf("\n");
 
     for (int i = 0; i < a->size; i++)
-        printf("%5.2f ", a->p[i]);
+        printf("%5.2f ", get(a, i));
     printf("\n");
 }
 
@@ -101,7 +126,7 @@ arr *arr_without_el(arr *a, int ex_pos)
     {
         if (i == ex_pos)
             continue;
-        insert(res, pos, a->p[i]);
+        set(res, pos, a->p[i]);
         pos++;
     }
 
@@ -112,7 +137,7 @@ arr *reverse(arr *a)
 {
     arr *res = init(a->size);
     for (int i = 0; i < a->size; i++)
-        insert(res, i, a->p[a->size - 1 - i]);
+        set(res, i, a->p[a->size - 1 - i]);
 
     return res;
 }
@@ -159,9 +184,9 @@ int has_comb(int *arr, int n, int k)
 
 int mult_by_index(arr *a, int *coords, int n)
 {
-    float res = 1;
+    double res = 1;
     for (int i = 0; i < n; i++)
-        res = res * a->p[coords[i]];
+        res = res * get(a, coords[i]);
 
     return res;
 }
@@ -176,7 +201,7 @@ int sum_of_mult_of_n_combinations(arr *a, int n)
         return a->p[0];
     }
 
-    float acc = 0;
+    double acc = 0;
 
     int coords[n];
     for (int i = 0; i < n; i++)
@@ -191,13 +216,13 @@ int sum_of_mult_of_n_combinations(arr *a, int n)
 
 int compose_denominator(arr *a, int pos)
 {
-    float res = 1;
+    double res = 1;
     for (int i = 0; i < a->size; i++)
     {
         if (i == pos)
             continue;
 
-        res = res * (a->p[pos] - a->p[i]);
+        res = res * (get(a, pos) - get(a, i));
     }
     return res;
 }
@@ -209,17 +234,17 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
     arr *jcoef = init(xes->size);
     for (int j = 0; j < xes->size; j++)
     {
-        int minus = !(xes->size % 2);
-        float denominator = compose_denominator(xes, j);
-        float multiplicator = ys->p[j];
+        int minus = (!(xes->size % 2) ? -1 : 1);
+        double denominator = compose_denominator(xes, j);
+        double multiplicator = get(ys, j);
 
         arr *xis = arr_without_el(xes, j);
 
         for (int i = 0; i < xes->size; i++)
         {
-            float k_sum = sum_of_mult_of_n_combinations(xis, xes->size - 1 - i);
-            insert(jcoef, i, (minus ? -1 : 1) * (multiplicator * k_sum) / denominator);
-            minus = !minus;
+            double k_sum = sum_of_mult_of_n_combinations(xis, xes->size - 1 - i);
+            set(jcoef, i, minus * (multiplicator * k_sum) / denominator);
+            minus = -minus;
         }
 
         res = add(res, jcoef);
@@ -232,35 +257,58 @@ arr *compose_interpolation_polynomial(arr *xes, arr *ys)
     return res;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    printf("Insert number of dots: ");
-    int n = 0;
+    int quiet_mode = 0;
+    if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'q')
+        quiet_mode = 1;
+
+    if (!quiet_mode)
+        printf("Insert number of dots: ");
+    int n = 6;
     scanf("%d", &n);
 
-    printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
+    if (!quiet_mode)
+        printf("Insert dots coordinates in the following format:\n<x> (space) <y>\nEach dot on new line\n");
 
     arr *xes = init(n);
     arr *ys = init(n);
 
+    // set(xes, 0, 1);
+    // set(ys, 0, 1);
+    // set(xes, 1, 2);
+    // set(ys, 1, 2);
+    // set(xes, 2, 3);
+    // set(ys, 2, 3);
+    // set(xes, 3, 4);
+    // set(ys, 3, 4);
+    // set(xes, 4, 5);
+    // set(ys, 4, 5);
+    // set(xes, 5, 6);
+    // set(ys, 5, 6);
+
     for (int i = 0; i < n; i++)
     {
-        float x, y;
-        scanf("%f %f", &x, &y);
+        double x, y;
+        scanf("%lf %lf", &x, &y);
 
-        insert(xes, i, x);
-        insert(ys, i, y);
+        set(xes, i, x);
+        set(ys, i, y);
     }
 
-    printf("Inserted the following doths:\n");
-    printa(xes);
-    printa(ys);
+    if (!quiet_mode)
+    {
+        printf("Inserted the following doths:\n");
+        printa(xes, 0);
+        printa(ys, 0);
+    }
 
     arr *res = compose_interpolation_polynomial(xes, ys);
 
-    printf("Resulting polynomial will have such coeficients:\n");
+    if (!quiet_mode)
+        printf("Resulting polynomial will have such coeficients:\n");
     arr *reversed = reverse(res);
-    printa(reversed);
+    printa(reversed, quiet_mode);
 
     free_arr(reversed);
     free_arr(res);
