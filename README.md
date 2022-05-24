@@ -10,17 +10,17 @@ Result will be printed to standart output in the following format:
 
 Newton polynomial form:
 
-<img src="http://www.sciweavers.org/tex2img.php?eq=f_0%20-%20f_1%2A%28x-x_0%29%20%2B%20...%20%2B%20f_n%28x-x_0%29%2A%28x-x_1%29%2A...%2A%28x-x_%7Bn-1%7D%29&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="f_0 - f_1*(x-x_0) + ... + f_n(x-x_0)*(x-x_1)*...*(x-x_{n-1})" width="503" height="19" />
+$$f_0 - f_1*(x-x_0) + ... + f_n(x-x_0)*(x-x_1)*...*(x-x_{n-1})$$
 
 Simplified coefficients array (starting from 0 upto n-1 power):
 
-<img src="http://www.sciweavers.org/tex2img.php?eq=a_0%20%5Cquad%20a_1%20%5Cquad%20...%20%5Cquad%20a_%7Bn-1%7D%20%5Cquad%20a_n&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="a_0 a_1 ... a_{n-1} a_n" width="185" height="15" />
+$$a_0 a_1 ... a_{n-1} a_n$$
 
 Polynomial in monic form:
 
-<img src="http://www.sciweavers.org/tex2img.php?eq=a_0%20-%20a_1%2Ax%20%2B%20...%20%2B%20a_%7Bn-1%7D%2Ax%5Cwedge%28n-2%29%20%2B%20a_n%2Ax%5Cwedge%28n-1%29&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="a_0 - a_1*x + ... + a_{n-1}*x^(n-2) + a_n*x^(n-1)" width="446" height="18" />
+$$a_0 - a_1*x + ... + a_{n-1}*x^(n-2) + a_n*x^(n-1)$$
 
-Where <img src="http://www.sciweavers.org/tex2img.php?eq=f_i&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="f_i" width="15" height="19" /> is a divided difference of <img src="http://www.sciweavers.org/tex2img.php?eq=y_1%2C%5Cldots%2Cy_i&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="y_1,...,y_i" width="79" height="15" />, <img src="http://www.sciweavers.org/tex2img.php?eq=a_i&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0" align="center" border="0" alt="a_i" width="19" height="15" /> are coefficients of resulting monic polynomial
+Where $f_i$ is a divided difference of $y_1,...,y_i$, $a_i$ are coefficients of resulting monic polynomial
 
 ## Data structure
 
